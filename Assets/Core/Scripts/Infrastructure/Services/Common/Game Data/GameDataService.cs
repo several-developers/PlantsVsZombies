@@ -11,10 +11,13 @@ namespace Core.Infrastructure.Services.Common
 
         // FIELDS: --------------------------------------------------------------------------------
 
-        private readonly GameData _gameData;
+        private GameData _gameData;
 
         // PUBLIC METHODS: ------------------------------------------------------------------------
 
+        public void SetGameData(GameData gameData) =>
+            _gameData = gameData;
+        
         public GameData GetGameData() => _gameData;
 
         public PlayerData GetPlayerData() => _gameData.PlayerData;

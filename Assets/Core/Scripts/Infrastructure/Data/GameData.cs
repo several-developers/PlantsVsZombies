@@ -25,6 +25,6 @@ namespace Core.Infrastructure.Data
         // FIELDS: --------------------------------------------------------------------------------
         
         private const string DataTitle = "Data";
-        private const string PlayerDataTitle = DataTitle + "Player Data";
+        private const string PlayerDataTitle = DataTitle + "/Player Data";
     }
 }

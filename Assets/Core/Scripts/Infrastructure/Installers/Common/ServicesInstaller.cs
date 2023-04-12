@@ -10,6 +10,7 @@ namespace Core.Infrastructure.Installers.Common
         public override void InstallBindings()
         {
             BindGameDataService();
+            BindScenesLoaderService();
         }
 
         // PRIVATE METHODS: -----------------------------------------------------------------------
@@ -18,6 +19,14 @@ namespace Core.Infrastructure.Installers.Common
         {
             Container
                 .BindInterfacesTo<GameDataService>()
+                .AsSingle()
+                .NonLazy();
+        }
+
+        private void BindScenesLoaderService()
+        {
+            Container
+                .BindInterfacesTo<ScenesLoaderService>()
                 .AsSingle()
                 .NonLazy();
         }
