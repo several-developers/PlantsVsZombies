@@ -13,7 +13,7 @@ namespace Core.Editor
             BuildReport report = BuildPlayer(new BuildPlayerOptions
             {
                 target = BuildTarget.Android,
-                locationPathName = "../artifacts/Game.apk",
+                locationPathName = "artifacts/Game.apk",
                 scenes = new[] { "Assets/Core/Scenes/Bootstrap.unity" }
             });
 
