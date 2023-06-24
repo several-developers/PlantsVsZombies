@@ -4,11 +4,11 @@ using UnityEngine;
 namespace Core.Infrastructure.Data
 {
     [Serializable]
-    public class PlayerData : DataBase
+    public class PlantsData : DataBase
     {
         // MEMBERS: -------------------------------------------------------------------------------
-
+        
         [SerializeField, Min(0)]
-        private int _money;
+        private int _plantsAmount;
     }
 }
