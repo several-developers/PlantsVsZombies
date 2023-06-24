@@ -12,6 +12,7 @@
 /[Rr]ecordings/
 /[Aa]ssets/[Ii]gnoreGit/
 /artifacts/
+/tools/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
