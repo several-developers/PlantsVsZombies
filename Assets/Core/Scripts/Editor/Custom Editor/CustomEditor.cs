@@ -1,8 +1,12 @@
 ﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Core.App;
+using Core.Infrastructure.Data;
+using Core.Utilities;
 using Sirenix.OdinInspector;
 using Sirenix.OdinInspector.Editor;
 using Sirenix.Utilities;
@@ -39,31 +43,55 @@ namespace Core.Editor.CustomEditor
         protected override OdinMenuTree BuildMenuTree()
         {
             OdinMenuTree tree = new OdinMenuTree(true);
+            
+            Debug.Log("Drawing tree...");
+            
             SetupMenuStyle(tree);
+
+            switch (_menuType)
+            {
+                case MenuType.Default:
+                    tree.AddAllAssetsAtPath(menuPath: "",
+                        assetFolderPath: "Assets/Resources/Game Data/",
+                        typeof(EditorMeta),
+                        includeSubDirectories: true);
+                    break;
+                
+                case MenuType.GameData:
+                    DrawDataButtons(tree);
+                    break;
+            }
+            
+            tree.EnumerateTree().SortMenuItemsByName();
+            
             return tree;
+        }
+
+        protected override void OnGUI()
+        {
+            DrawDataToolbar();
+            base.OnGUI();
         }
 
         protected override void OnBeginDrawEditors()
         {
-            if (MenuTree == null ||
-                MenuTree.Selection == null)
-            {
+            bool skip = MenuTree == null || MenuTree.Selection == null;
+            
+            if (skip)
                 return;
-            }
 
-            DrawDataToolbar();
             DrawMetaBar();
         }
 
-        protected override IEnumerable<object> GetTargets()
-        {
-            switch (_menuType)
-            {
-                case MenuType.GameData:
-                    yield return _gameDataViewer;
-                    break;
-            }
-        }
+        // protected override IEnumerable<object> GetTargets()
+        // {
+        //     switch (_menuType)
+        //     {
+        //         case MenuType.GameData:
+        //             yield return _gameDataViewer;
+        //             break;
+        //     }
+        // }
 
         // PRIVATE METHODS: -----------------------------------------------------------------------
 
@@ -97,6 +125,7 @@ namespace Core.Editor.CustomEditor
 
         private void DrawDataToolbar()
         {
+            bool redrawTree = false;
             int heightMargin = 2;
             int widthMargin = 6;
             int iconsSize = 21;
@@ -106,15 +135,32 @@ namespace Core.Editor.CustomEditor
             guiStyle.margin = new RectOffset(left: widthMargin, right: widthMargin, top: heightMargin,
                 bottom: heightMargin);
 
+            Texture metaMenuIcon = _menuType == MenuType.Default
+                ? EditorIcons.List.Highlighted
+                : EditorIcons.List.Inactive;
+            
+            Texture dataMenuIcon = _menuType == MenuType.GameData
+                ? EditorIcons.Clouds.Highlighted
+                : EditorIcons.Clouds.Inactive;
+
             SirenixEditorGUI.BeginHorizontalToolbar(guiStyle.lineHeight);
 
-            if (SirenixEditorGUI.IconButton(EditorIcons.List, guiStyle, width: iconsSize, height: iconsSize))
+            if (SirenixEditorGUI.IconButton(metaMenuIcon, guiStyle, width: iconsSize, height: iconsSize))
+            {
                 _menuType = MenuType.Default;
+                redrawTree = true;
+            }
 
-            if (SirenixEditorGUI.IconButton(EditorIcons.Clouds, guiStyle, width: iconsSize, height: iconsSize))
+            if (SirenixEditorGUI.IconButton(dataMenuIcon, guiStyle, width: iconsSize, height: iconsSize))
+            {
                 _menuType = MenuType.GameData;
+                redrawTree = true;
+            }
 
             SirenixEditorGUI.EndHorizontalToolbar();
+
+            if (redrawTree)
+                BuildMenuTree();
         }
 
         private void DrawMetaBar()
@@ -192,6 +238,19 @@ namespace Core.Editor.CustomEditor
             }
 
             SirenixEditorGUI.EndHorizontalToolbar();
+        }
+
+        private void DrawDataButtons(OdinMenuTree tree)
+        {
+            IEnumerable<Type> subclassTypes = Assembly
+                .GetAssembly(typeof(DataBase))
+                .GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(DataBase)));
+
+            foreach (Type type in subclassTypes)
+            {
+                tree.Add(type.Name.GetNiceName(), Activator.CreateInstance(type));
+            }
         }
     }
 }
